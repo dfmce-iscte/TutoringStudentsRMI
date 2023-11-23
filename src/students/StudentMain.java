@@ -4,12 +4,11 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 import interfaces.ITutoringServer;
+import interfaces.SerializableMap;
 import interfaces.IAppointment;
 import interfaces.IStudent;
 import interfaces.ITeacher;
@@ -31,23 +30,22 @@ public class StudentMain {
             while (true) {
                 String text = scanner.nextLine();
                 if (text.equals("m")) {
-                    Map<ITeacher, Set<IAppointment>> teachers = server.search_availability_for_specific_subject("Math");
-                    for (Map.Entry<ITeacher, Set<IAppointment>> entry : teachers.entrySet()) {
-
-                        if (entry.getValue().isEmpty()) {
-                            System.out.println("Vou para a wainting list" + entry.getKey().to_string());
+                    SerializableMap<ITeacher, List<IAppointment>> teachers = server.search_availability_for_specific_subject("Math");
+                    for (ITeacher teacher: teachers.keys()) {
+                        if (teachers.get(teacher).isEmpty()) {
+                            System.out.println("Vou para a wainting list" + teacher.to_string());
                             IStudent is1 = s1;
                             IStudent is2 = s2;
                             IStudent is3 = s3;
-                            tbruno = entry.getKey();
-                            entry.getKey().add_student_to_waiting_list(is1, "Math");
-                            entry.getKey().add_student_to_waiting_list(is2, "Math");
-                            entry.getKey().add_student_to_waiting_list(is3, "Math");
+                            tbruno = teacher;
+                            teacher.add_student_to_waiting_list(is1, "Math");
+                            teacher.add_student_to_waiting_list(is2, "Math");
+                            teacher.add_student_to_waiting_list(is3, "Math");
                         }
 
                         else {
-                            for (IAppointment app : entry.getValue()) {
-                                System.out.println("Vou fazer Book " + entry.getKey().to_string());
+                            for (IAppointment app : teachers.get(teacher)) {
+                                System.out.println("Vou fazer Book " + teacher.to_string());
                                 IStudent is1 = s1;
                                 System.out.println(app.book_appointment(is1));
                                 System.out.println(s1.to_string());
@@ -57,11 +55,10 @@ public class StudentMain {
                     }
 
                 } else if (text.equals("p")) {
-                    Map<ITeacher, Set<IAppointment>> teachers = server
-                            .search_availability_for_specific_subject("Physics");
-                    for (Map.Entry<ITeacher, Set<IAppointment>> entry : teachers.entrySet()) {
-                        System.out.println("For teacher: " + entry.getKey());
-                        for (IAppointment app : entry.getValue())
+                    SerializableMap<ITeacher, List<IAppointment>> teachers = server.search_availability_for_specific_subject("Physics");
+                    for (ITeacher teacher: teachers.keys()) {
+                        System.out.println("For teacher: " + teacher);
+                        for (IAppointment app : teachers.get(teacher))
                             System.out.println("    " + app.toString());
                     }
 
