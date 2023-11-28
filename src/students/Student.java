@@ -1,55 +1,83 @@
 package students;
 
+import java.awt.List;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import interfaces.IAppointment;
 import interfaces.IStudent;
+import interfaces.ITeacher;
 
 public class Student extends UnicastRemoteObject implements IStudent {
 
-	private Set<IAppointment> student_appointments;
-	private Set<IAppointment> appoiments_notified;
+	private Set<IAppointment> studentAppointments;
+	private Set<IAppointment> appoimentsNotified;
+	private Map<String, ITeacher> studentWaitingList;
 	private String name;
 
-	protected Student(String name) throws RemoteException {
+	public Student(String name) throws RemoteException {
 		super();
 		// this.student_appointments = new TreeSet<IAppointment>(new
 		// AppointmentComparator());
-		this.student_appointments = new HashSet<IAppointment>();
+		this.studentAppointments = new HashSet<IAppointment>();
 		this.name = name;
-		this.appoiments_notified = new HashSet<IAppointment>();
+		this.appoimentsNotified = new HashSet<IAppointment>();
+		this.studentWaitingList = new HashMap<String, ITeacher>();
 	}
 
 	@Override
-	public void appointment_available(IAppointment appointments) throws RemoteException {
-		appoiments_notified.add(appointments);
+	public void appointmentAvailable(IAppointment appointments) throws RemoteException {
+		appoimentsNotified.add(appointments);
 		System.out.println("Student: " + name + "\n\tAppointment available: " + appointments.to_string());
 	}
 
 	@Override
-	public void add_appointment(IAppointment appointment) throws RemoteException {
-		student_appointments.add(appointment);
+	public void addAppointment(IAppointment appointment) throws RemoteException {
+		studentAppointments.add(appointment);
 	}
 
 	@Override
-	public String get_name() throws RemoteException {
+	public String getName() throws RemoteException {
 		return name;
 	}
 
+	public Set<IAppointment> getStudentAppointments() {
+		return studentAppointments;
+	}
+
+	public Set<IAppointment> getAppoimentsNotified() throws RemoteException {
+		return appoimentsNotified;
+	}
+
+	public void addStudentToWaitingList(String subject, ITeacher teacher) throws RemoteException {
+		studentWaitingList.put(subject, teacher);
+	}
+
+	@Override
+	public Map<String, ITeacher> getStudentWaitingList() throws RemoteException {
+		return studentWaitingList;
+	}
+
+	public void removeStudentFromWaitingList(String subject,ITeacher teacherName) throws RemoteException {
+		System.out.println("Subject: " + subject + " Teacher: " + teacherName.getName());
+		for (Map.Entry<String, ITeacher> entry : studentWaitingList.entrySet()) {
+			System.out.println("Subject: " + entry.getKey() + " Teacher: " + entry.getValue().getName());
+			if (entry.getKey().equals(subject) && entry.getValue().equals(teacherName)) {
+				studentWaitingList.remove(subject, teacherName);
+				System.out.println("REMOVEDDDDDDDDDD");
+				return;
+			}
+		}
+	}
+
+
+
 	@Override
 	public String to_string() {
-		return "Student [number of student_appointments=" + student_appointments.size() + "]" + " name: " + name;
+		return "Student [number of student_appointments=" + studentAppointments.size() + "]" + " name: " + name;
 	}
-
-	public Set<IAppointment> get_student_appointments() {
-		return student_appointments;
-	}
-
-	public Set<IAppointment> get_appoiments_notified() throws RemoteException {
-		return appoiments_notified;
-	}
-
 }
