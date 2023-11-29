@@ -1,6 +1,6 @@
 package students;
 
-import java.awt.List;
+
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
-
 import interfaces.IAppointment;
 import interfaces.IStudent;
 import interfaces.ITeacher;
@@ -23,8 +21,7 @@ public class Student extends UnicastRemoteObject implements IStudent {
 
 	public Student(String name) throws RemoteException {
 		super();
-		// this.student_appointments = new TreeSet<IAppointment>(new
-		// AppointmentComparator());
+		
 		this.studentAppointments = new HashSet<IAppointment>();
 		this.name = name;
 		this.appoimentsNotified = new HashSet<IAppointment>();

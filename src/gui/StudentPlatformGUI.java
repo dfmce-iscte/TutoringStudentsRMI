@@ -5,11 +5,10 @@ import javax.swing.*;
 import interfaces.IAppointment;
 import interfaces.ITeacher;
 import interfaces.ITutoringServer;
-import interfaces.SerializableMap;
+
 import students.Student;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.awt.*;
@@ -44,7 +43,7 @@ public class StudentPlatformGUI {
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // Simulated appointments list
+        
 
         // Create panels for different functionalities
         JPanel scheduledAppointmentsPanel = new JPanel(new BorderLayout());
@@ -65,13 +64,7 @@ public class StudentPlatformGUI {
 
         JButton bookAppointmentButton = new JButton("Book Appointment");
 
-        // Appointments List
-        /*
-         * DefaultListModel<String> appointmentsListModel = new DefaultListModel<>();
-         * JList<String> appointmentsList = new JList<>(appointmentsListModel);
-         * appointmentsList.setCellRenderer(new AppointmentListCellRenderer());
-         * JScrollPane appointmentsScrollPane = new JScrollPane(appointmentsList);
-         */
+        
         JPanel notificationsPanel = new JPanel(new BorderLayout());
         JTextArea notificationsTextArea = new JTextArea(15, 50);
         notificationsTextArea.setEditable(false);
@@ -188,6 +181,7 @@ public class StudentPlatformGUI {
                 subjectDropdown.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         teacherDropdown.removeAllItems();
+                        timeDropdown.removeAllItems();
                         String selectedSubject = (String) subjectDropdown.getSelectedItem();
                         Map<ITeacher, Set<IAppointment>> availableApp;
                         try {
@@ -218,6 +212,7 @@ public class StudentPlatformGUI {
                             for (IAppointment appointment : server.getAppointmentsForSubjectAndTeacher(selectedTeacher,
                                     selectedSubject)) {
                                 timeDropdown.addItem(appointment.to_string());
+                                System.out.println();
                             }
                         } catch (RemoteException e1) {
                             // TODO Auto-generated catch block
@@ -279,9 +274,6 @@ public class StudentPlatformGUI {
                     String subjectName = selectedSubject.split(" ")[0];
                     String teacherName = selectedSubject.split(" ")[1];
 
-                    // Remove the selected student from the waiting list for the chosen subject and
-                    // teacher
-                    // Update the waiting list display accordingly
 
                     try {
 
@@ -305,7 +297,27 @@ public class StudentPlatformGUI {
                 }
             }
         });
-
+        Thread thread = new Thread() {
+            public void run() {
+                while (true) {
+                    try {
+                        notificationsTextArea.setText("");
+                        for (IAppointment appointment : student.getAppoimentsNotified()) {
+                            System.out.println("Appointment available: " + appointment.to_string() + "\n");
+                            notificationsTextArea.append("Appointment available: " + appointment.to_string() + "\n");
+                        }
+                        //student.getAppoimentsNotified().clear();
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (RemoteException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        thread.start();
         waitingListPanel.add(removeFromWaitingListButton, BorderLayout.SOUTH);
         frame.setVisible(true);
     }
