@@ -17,9 +17,10 @@ public class StudentMainGui {
         try {
             ITutoringServer server = (ITutoringServer) Naming.lookup("TutoringPlatform");
             Student s1 = new Student("s1");
+            Student s2 = new Student("s2");
 
             StudentPlatformGUI gui1 = new StudentPlatformGUI(s1, server);
-
+            StudentPlatformGUI gui2 = new StudentPlatformGUI(s2, server);
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {

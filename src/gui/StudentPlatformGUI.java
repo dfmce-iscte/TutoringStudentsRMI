@@ -36,7 +36,7 @@ public class StudentPlatformGUI {
     public void studentGui() {
         frame = new JFrame("Student Platform");
         frame.setSize(800, 600);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Simulated appointments list
 
