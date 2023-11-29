@@ -7,6 +7,8 @@ import interfaces.ITeacher;
 import interfaces.ITutoringServer;
 import interfaces.SerializableMap;
 import students.Student;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,8 +21,6 @@ public class StudentPlatformGUI {
     private JFrame frame;
     private Student student;
     private ITutoringServer server;
-    private IAppointment appointment;
-    private ITeacher teacher;
 
     public StudentPlatformGUI(Student student, ITutoringServer server) {
         this.student = student;
@@ -34,7 +34,13 @@ public class StudentPlatformGUI {
     }
 
     public void studentGui() {
-        frame = new JFrame("Student Platform");
+        String name = "";
+        try {
+            name = student.getName();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        frame = new JFrame("Student Platform: " + name);
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -59,11 +65,19 @@ public class StudentPlatformGUI {
 
         JButton bookAppointmentButton = new JButton("Book Appointment");
 
+        // Appointments List
+        /*
+         * DefaultListModel<String> appointmentsListModel = new DefaultListModel<>();
+         * JList<String> appointmentsList = new JList<>(appointmentsListModel);
+         * appointmentsList.setCellRenderer(new AppointmentListCellRenderer());
+         * JScrollPane appointmentsScrollPane = new JScrollPane(appointmentsList);
+         */
         JPanel notificationsPanel = new JPanel(new BorderLayout());
         JTextArea notificationsTextArea = new JTextArea(15, 50);
         notificationsTextArea.setEditable(false);
         JScrollPane notificationsScrollPane = new JScrollPane(notificationsTextArea);
         notificationsPanel.add(new JLabel("Notifications"), BorderLayout.NORTH);
+        // notificationsPanel.add(appointmentsScrollPane, BorderLayout.CENTER);
         notificationsPanel.add(notificationsScrollPane, BorderLayout.CENTER);
 
         // Create a tabbed pane to organize different functionalities
@@ -84,7 +98,8 @@ public class StudentPlatformGUI {
         // Action listener for the 'Join Waiting List' button
         joinWaitingListButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JComboBox<String> subjectDropdown = new JComboBox<>();
+                String[] items = {"SELECT ONE OF THE OPTIONS"};
+                JComboBox<String> subjectDropdown = new JComboBox<>(items);
                 try {
                     System.out.println("subjects" + server.getAllSubjects());
                     for (String subject : server.getAllSubjects()) {
@@ -124,7 +139,7 @@ public class StudentPlatformGUI {
 
                 int result = JOptionPane.showConfirmDialog(frame, panel, "Join Waiting List",
                         JOptionPane.OK_CANCEL_OPTION);
-                if (result == JOptionPane.OK_OPTION) {
+                if (result == JOptionPane.OK_OPTION && !subjectDropdown.getSelectedItem().equals("SELECT ONE OF THE OPTIONS")) {
                     String selectedSubject = (String) subjectDropdown.getSelectedItem();
                     String selectedTeacher = (String) teacherDropdown.getSelectedItem();
 
@@ -146,6 +161,7 @@ public class StudentPlatformGUI {
         bookAppointmentButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JComboBox<String> subjectDropdown = new JComboBox<>();
+                subjectDropdown.addItem("SELECT ONE OF THE OPTIONS");
                 try {
                     for (String subject : server.getAllSubjects()) {
                         subjectDropdown.addItem(subject);
@@ -156,8 +172,10 @@ public class StudentPlatformGUI {
                 }
 
                 JComboBox<String> teacherDropdown = new JComboBox<>();
+                teacherDropdown.setSize(100, 100);
 
                 JComboBox<String> timeDropdown = new JComboBox<>();
+                timeDropdown.setSize(100, 100);
 
                 JPanel panel = new JPanel(new GridLayout(0, 1));
                 panel.add(new JLabel("Select Subject:"));
@@ -210,7 +228,7 @@ public class StudentPlatformGUI {
 
                 int result = JOptionPane.showConfirmDialog(frame, panel, "Book Appointment",
                         JOptionPane.OK_CANCEL_OPTION);
-                if (result == JOptionPane.OK_OPTION) {
+                if (result == JOptionPane.OK_OPTION && !subjectDropdown.getSelectedItem().equals("SELECT ONE OF THE OPTIONS")) {
                     String selectedTeacher = (String) teacherDropdown.getSelectedItem();
                     String selectedSubject = (String) subjectDropdown.getSelectedItem();
                     String selectedAppointment = (String) timeDropdown.getSelectedItem();
@@ -242,9 +260,12 @@ public class StudentPlatformGUI {
                 panel.add(new JLabel("Select Appointment:"));
                 panel.add(subjectDropdown);
                 try {
-                    Map<String, ITeacher> waitingList = student.getStudentWaitingList();
-                    for (String teacher : waitingList.keySet()) {
-                        subjectDropdown.addItem(teacher+" "+waitingList.get(teacher).getName());
+                    Map<String, ArrayList<ITeacher>> waitingList = student.getStudentWaitingList();
+                    for (String subject : waitingList.keySet()) {
+                        for (ITeacher teacher : waitingList.get(subject)) {
+                            subjectDropdown.addItem(subject + " " + teacher.getName());
+                        }
+
                     }
                 } catch (RemoteException e1) {
                     // TODO Auto-generated catch block
@@ -263,15 +284,19 @@ public class StudentPlatformGUI {
                     // Update the waiting list display accordingly
 
                     try {
-                        
+
                         ITeacher teacher = server.getTeacherByName(teacherName);
                         System.out.println(student.getStudentWaitingList().size());
                         student.removeStudentFromWaitingList(subjectName, teacher);
                         System.out.println(student.getStudentWaitingList().size());
                         teacher.removeStudentFromWaitingList(student, subjectName);
                         waitingListTextArea.setText("");
-                        for(String teacher1: student.getStudentWaitingList().keySet()) {
-                            waitingListTextArea.append("Teacher: " + teacher1 + ", Subject: " + student.getStudentWaitingList().get(teacher1).getName() + "\n");
+                        for (String subject : student.getStudentWaitingList().keySet()) {
+                            for (ITeacher teacher1 : student.getStudentWaitingList().get(subject)) {
+                                waitingListTextArea.append("Subject: " + subject + ", Teacher: "
+                                        + teacher1.getName() + "\n");
+                            }
+
                         }
 
                     } catch (RemoteException e1) {
@@ -285,4 +310,16 @@ public class StudentPlatformGUI {
         frame.setVisible(true);
     }
 
+    static class AppointmentListCellRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+                boolean cellHasFocus) {
+            Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (renderer instanceof JLabel && value instanceof String) {
+                String appointment = (String) value;
+                ((JLabel) renderer).setText(appointment);
+            }
+            return renderer;
+        }
+    }
 }

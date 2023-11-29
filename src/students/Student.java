@@ -3,10 +3,12 @@ package students;
 import java.awt.List;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import interfaces.IAppointment;
 import interfaces.IStudent;
@@ -16,7 +18,7 @@ public class Student extends UnicastRemoteObject implements IStudent {
 
 	private Set<IAppointment> studentAppointments;
 	private Set<IAppointment> appoimentsNotified;
-	private Map<String, ITeacher> studentWaitingList;
+	private Map<String, ArrayList<ITeacher>> studentWaitingList;
 	private String name;
 
 	public Student(String name) throws RemoteException {
@@ -26,7 +28,7 @@ public class Student extends UnicastRemoteObject implements IStudent {
 		this.studentAppointments = new HashSet<IAppointment>();
 		this.name = name;
 		this.appoimentsNotified = new HashSet<IAppointment>();
-		this.studentWaitingList = new HashMap<String, ITeacher>();
+		this.studentWaitingList = new HashMap<String, ArrayList<ITeacher>>();
 	}
 
 	@Override
@@ -54,22 +56,26 @@ public class Student extends UnicastRemoteObject implements IStudent {
 	}
 
 	public void addStudentToWaitingList(String subject, ITeacher teacher) throws RemoteException {
-		studentWaitingList.put(subject, teacher);
+		if (!studentWaitingList.containsKey(subject)) {
+			studentWaitingList.put(subject, new ArrayList<ITeacher>());
+		}
+		studentWaitingList.get(subject).add(teacher);
 	}
 
 	@Override
-	public Map<String, ITeacher> getStudentWaitingList() throws RemoteException {
+	public Map<String, ArrayList<ITeacher>> getStudentWaitingList() throws RemoteException {
 		return studentWaitingList;
 	}
 
 	public void removeStudentFromWaitingList(String subject,ITeacher teacherName) throws RemoteException {
 		System.out.println("Subject: " + subject + " Teacher: " + teacherName.getName());
-		for (Map.Entry<String, ITeacher> entry : studentWaitingList.entrySet()) {
-			System.out.println("Subject: " + entry.getKey() + " Teacher: " + entry.getValue().getName());
-			if (entry.getKey().equals(subject) && entry.getValue().equals(teacherName)) {
-				studentWaitingList.remove(subject, teacherName);
-				System.out.println("REMOVEDDDDDDDDDD");
-				return;
+		if (studentWaitingList.containsKey(subject)) {
+			ArrayList<ITeacher> teachers = studentWaitingList.get(subject);
+			for (ITeacher teacher : teachers) {
+				if (teacher.getName().equals(teacherName.getName())) {
+					teachers.remove(teacher);
+					break;
+				}
 			}
 		}
 	}
