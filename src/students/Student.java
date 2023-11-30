@@ -77,6 +77,10 @@ public class Student extends UnicastRemoteObject implements IStudent {
 		}
 	}
 
+	public void deleteAllNotifications(){
+		appoimentsNotified.clear();
+	}
+
 
 
 	@Override

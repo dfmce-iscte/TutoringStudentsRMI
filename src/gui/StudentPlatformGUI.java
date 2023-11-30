@@ -318,6 +318,14 @@ public class StudentPlatformGUI {
             }
         };
         thread.start();
+        JButton deleteAllNotificationsButton = new JButton("Delete All Notifications");
+        deleteAllNotificationsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                student.deleteAllNotifications();
+                notificationsTextArea.setText("");
+            }
+        });
+        notificationsPanel.add(deleteAllNotificationsButton, BorderLayout.SOUTH);
         waitingListPanel.add(removeFromWaitingListButton, BorderLayout.SOUTH);
         frame.setVisible(true);
     }
