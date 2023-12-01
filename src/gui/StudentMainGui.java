@@ -16,8 +16,8 @@ public class StudentMainGui {
 
         try {
             ITutoringServer server = (ITutoringServer) Naming.lookup("TutoringPlatform");
-            Student s1 = new Student("s1");
-            Student s2 = new Student("s2");
+            Student s1 = new Student("Diogo");
+            Student s2 = new Student("Margarida");
 
             StudentPlatformGUI gui1 = new StudentPlatformGUI(s1, server);
             StudentPlatformGUI gui2 = new StudentPlatformGUI(s2, server);

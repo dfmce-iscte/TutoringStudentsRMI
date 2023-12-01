@@ -44,14 +44,22 @@ public class StudentPlatformGUI {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         
+       
+       
 
         // Create panels for different functionalities
         JPanel scheduledAppointmentsPanel = new JPanel(new BorderLayout());
-        JTextArea scheduledAppointmentsTextArea = new JTextArea(15, 50);
-        scheduledAppointmentsTextArea.setEditable(false);
-        JScrollPane scheduledAppointmentsScrollPane = new JScrollPane(scheduledAppointmentsTextArea);
+
+        DefaultListModel<IAppointment> appointmentsListModel = new DefaultListModel<>();
+        JList<IAppointment> appointmentsList = new JList<>(appointmentsListModel);
+
+        appointmentsList.setCellRenderer(new AppointmentListCellRenderer());
+        JScrollPane appointmentsScrollPane = new JScrollPane(appointmentsList);
+        //JTextArea scheduledAppointmentsTextArea = new JTextArea(15, 50);
+        //scheduledAppointmentsTextArea.setEditable(false);
+        //JScrollPane scheduledAppointmentsScrollPane = new JScrollPane(scheduledAppointmentsTextArea);
         scheduledAppointmentsPanel.add(new JLabel("Scheduled Appointments"), BorderLayout.NORTH);
-        scheduledAppointmentsPanel.add(scheduledAppointmentsScrollPane, BorderLayout.CENTER);
+        scheduledAppointmentsPanel.add(appointmentsScrollPane, BorderLayout.CENTER);
 
         JPanel waitingListPanel = new JPanel(new BorderLayout());
         JTextArea waitingListTextArea = new JTextArea(15, 50);
@@ -231,13 +239,15 @@ public class StudentPlatformGUI {
                         ITeacher teacher = server.getTeacherByName(selectedTeacher);
                         IAppointment appointment = teacher.getAppointment(selectedAppointment);
                         appointment.bookAppointment(student);
+                        appointmentsListModel.addElement(appointment);
+                        System.out.println("Appointment booked: " + appointment.to_string() + "\n");
                     } catch (RemoteException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
                     }
-                    scheduledAppointmentsTextArea.append("Teacher: " + selectedTeacher + ", Subject: "
-                            + selectedSubject + ", Time: " + selectedAppointment + "\n");
-
+                    //scheduledAppointmentsTextArea.append("Teacher: " + selectedTeacher + ", Subject: "
+                      //      + selectedSubject + ", Time: " + selectedAppointment + "\n");
+                    
                 }
 
             }
@@ -335,9 +345,13 @@ public class StudentPlatformGUI {
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                 boolean cellHasFocus) {
             Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            if (renderer instanceof JLabel && value instanceof String) {
-                String appointment = (String) value;
-                ((JLabel) renderer).setText(appointment);
+            if (renderer instanceof JLabel && value instanceof IAppointment) {
+                IAppointment appointment = (IAppointment) value;
+                try {
+                    ((JLabel) renderer).setText(appointment.to_string());
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
             return renderer;
         }
